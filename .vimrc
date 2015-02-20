@@ -1,19 +1,20 @@
-"" vundle ""
+" required for vundle "
 set nocompatible
 filetype off
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 
-"" plugins ""
+" plugins "
 
-" Vundle
+" Vundle - Plugin management
 Plugin 'gmarik/vundle'
 
-" NerdTree
+" NerdTree - File browser
 Plugin 'scrooloose/nerdtree.git'
+" Toggle NerdTree with F2
 map <F2> :NERDTreeToggle<CR>
 
-" Go syntax
+" Go syntax highlight
 Plugin 'geekq/vim-go.git'
 
 " Colorscheme
@@ -33,13 +34,21 @@ filetype plugin indent on
 
 
 " Key combos
-imap jk <Esc>
+" jk instead of escape to exit edit mode
+imap jk <Esc> 
+" F3 for saving
 map <F3> :w<CR>
+" F4 to close window
 map <F4> :q<CR>
+" Tab for next window
 nnoremap <Tab> <C-W>w
+" Shift-Tab for previous window
 nnoremap <S-Tab> <C-W>p
+" Ctrl-K for new empty line above current
 nmap <C-K> O<Esc>
+" Ctrl-J for new empty line below current
 nmap <C-J> o<Esc>
+" Ctrl-n to remove search highlight
 nnoremap <C-N> :noh<CR>
 
 " Tab
@@ -50,12 +59,17 @@ set shiftwidth=4
 
 colorscheme monokai
 
+" Enable line numbering
 set number
 set hidden
+" Enable incremental search as you type
 set incsearch
+" Enable search highlight
 set hlsearch
+" Enable case insensitive search
 set ignorecase
 
+" Enable thick cursor when in normal mode
 if has("autocmd")
 	au InsertEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
 	au InsertLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
