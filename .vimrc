@@ -61,13 +61,19 @@ colorscheme monokai
 
 " Enable line numbering
 set number
-set hidden
 " Enable incremental search as you type
 set incsearch
 " Enable search highlight
 set hlsearch
 " Enable case insensitive search
 set ignorecase
+
+" disable swp files
+set nobackup
+
+" Makefiles
+:map <f9> :make<CR>
+:map <f10> :cw<CR>
 
 " Enable thick cursor when in normal mode
 if has("autocmd")
