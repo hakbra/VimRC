@@ -1,10 +1,13 @@
 " required for vundle "
 set nocompatible
 filetype off
-set rtp+=~/.vim/bundle/vundle/
+set rtp+=~/.vim/bundle/Vundle.vim/
 call vundle#rc()
 
 " plugins "
+"
+" Coffe script highlighting
+Plugin 'kchmck/vim-coffee-script'
 
 " Vundle - Plugin management
 Plugin 'gmarik/vundle'
@@ -26,14 +29,20 @@ Plugin 'tpope/vim-surround.git'
 " Syntastic
 Plugin 'scrooloose/syntastic.git'
 
+" Taboo
+Plugin 'gcmt/taboo.vim.git'
+set sessionoptions+=tabpages,globals
+
 " YouCompleteMe
-Plugin 'Valloric/YouCompleteMe.git'
+ Plugin 'Valloric/YouCompleteMe.git'
 let g:ycm_global_ycm_extra_conf = '~/.vim/.ycm_extra_conf.py'
+let g:ycm_add_preview_to_completeopt = 0
+let g:ycm_max_diagnostics_to_display = 5
 
 filetype plugin indent on
 
-
 " Key combos
+let mapleader=','
 " jk instead of escape to exit edit mode
 imap jk <Esc> 
 " F3 for saving
@@ -50,14 +59,26 @@ nmap <C-K> O<Esc>
 nmap <C-J> o<Esc>
 " Ctrl-n to remove search highlight
 nnoremap <C-N> :noh<CR>
+" Exit terminal mode
+if has('nvim')
+	tnoremap <Esc> <C-\><C-n>
+endif
+" GO to definition
+nnoremap <Leader>d :YcmCompleter GoTo<CR>
+nnoremap <Leader>f :YcmCompleter FixIt<CR>
+nnoremap <Leader>h :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+nnoremap Q @q
+
+set splitbelow
+set splitright 
 
 " Tab
 set tabstop=4
 set softtabstop=0
-set expandtab
 set shiftwidth=4
 
 colorscheme monokai
+syntax enable
 
 " Enable line numbering
 set number
@@ -67,9 +88,29 @@ set incsearch
 set hlsearch
 " Enable case insensitive search
 set ignorecase
+" Enable global search default
+set gdefault
 
 " disable swp files
 set nobackup
+
+" graphic tab match
+set wildmenu
+" improves perf on macros
+set lazyredraw
+
+" Folding
+set foldenable
+set foldlevelstart=10
+set foldnestmax=10
+nnoremap <space> zA
+set foldmethod=indent
+
+set backup
+set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set backupskip=/tmp/*,/private/tmp/*
+set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set writebackup
 
 " Makefiles
 :map <f9> :make<CR>
