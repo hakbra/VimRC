@@ -38,7 +38,7 @@ set sessionoptions+=tabpages,globals
 
 " YouCompleteMe
  Plugin 'Valloric/YouCompleteMe.git'
-let g:ycm_global_ycm_extra_conf = '~/.vim/.ycm_extra_conf.py'
+let g:ycm_global_ycm_extra_conf = '~/.vim/YouCompleteMe/.ycm_extra_conf.py'
 let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_max_diagnostics_to_display = 5
 
