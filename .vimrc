@@ -88,7 +88,11 @@ set tabstop=4
 set softtabstop=0
 set shiftwidth=4
 
-colorscheme monokai
+try
+	colorscheme monokai
+catch /^Vim\%((\a\+)\)\=:E185/
+	" deal with it
+endtry
 syntax enable
 
 " Enable line numbering
