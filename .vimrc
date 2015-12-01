@@ -2,10 +2,13 @@
 set nocompatible
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim/
-call vundle#rc()
+call vundle#begin()
 
 " plugins "
 "
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
 " Coffe script highlighting
 Plugin 'kchmck/vim-coffee-script'
 
@@ -39,6 +42,7 @@ let g:ycm_global_ycm_extra_conf = '~/.vim/.ycm_extra_conf.py'
 let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_max_diagnostics_to_display = 5
 
+call vundle#end()
 filetype plugin indent on
 
 " Key combos
