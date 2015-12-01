@@ -52,16 +52,23 @@ map <F4> :q<CR>
 " Tab for next window
 nnoremap <Tab> <C-W>w
 " Shift-Tab for previous window
-nnoremap <S-Tab> <C-W>p
+nnoremap <S-Tab> <C-W>W
 " Ctrl-K for new empty line above current
 nmap <C-K> O<Esc>
 " Ctrl-J for new empty line below current
 nmap <C-J> o<Esc>
 " Ctrl-n to remove search highlight
 nnoremap <C-N> :noh<CR>
+
+" Window navigation
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
 " Exit terminal mode
 if has('nvim')
-	tnoremap <Esc> <C-\><C-n>
+	tnoremap <ESC> <C-\><C-n>
 endif
 " GO to definition
 nnoremap <Leader>d :YcmCompleter GoTo<CR>
