@@ -6,11 +6,18 @@ call vundle#begin()
 
 " plugins "
 "
+
+" FOr changing between header and source
+Plugin 'derekwyatt/vim-fswitch'
+
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
 " Coffe script highlighting
 Plugin 'kchmck/vim-coffee-script'
+
+" Quick scope navigation
+Plugin 'unblevable/quick-scope'
 
 " Vundle - Plugin management
 Plugin 'gmarik/vundle'
@@ -38,7 +45,7 @@ set sessionoptions+=tabpages,globals
 
 " YouCompleteMe
  Plugin 'Valloric/YouCompleteMe.git'
-let g:ycm_global_ycm_extra_conf = '~/.vim/YouCompleteMe/.ycm_extra_conf.py'
+let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
 let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_max_diagnostics_to_display = 5
 
@@ -77,7 +84,7 @@ endif
 " GO to definition
 nnoremap <Leader>d :YcmCompleter GoTo<CR>
 nnoremap <Leader>f :YcmCompleter FixIt<CR>
-nnoremap <Leader>h :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+nnoremap <Leader>h :FSHere<CR>
 nnoremap Q @q
 
 set splitbelow
@@ -126,6 +133,8 @@ set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set backupskip=/tmp/*,/private/tmp/*
 set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set writebackup
+
+set mouse=
 
 " Makefiles
 :map <f9> :make<CR>
