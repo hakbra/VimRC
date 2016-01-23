@@ -30,6 +30,10 @@ map <F2> :NERDTreeToggle<CR>
 " Go syntax highlight
 Plugin 'geekq/vim-go.git'
 
+" Markdown folding
+Plugin 'nelstrom/vim-markdown-folding'
+let g:markdown_fold_style = 'nested'
+
 " Colorscheme
 Plugin 'sickill/vim-monokai.git'
 
@@ -47,6 +51,8 @@ set sessionoptions+=tabpages,globals
  Plugin 'Valloric/YouCompleteMe.git'
 let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
 let g:ycm_add_preview_to_completeopt = 0
+let g:ycm_autoclose_preview_window_after_completion = 1
+let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_max_diagnostics_to_display = 5
 
 call vundle#end()
@@ -77,10 +83,6 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
-" Exit terminal mode
-if has('nvim')
-	tnoremap <ESC> <C-\><C-n>
-endif
 " GO to definition
 nnoremap <Leader>d :YcmCompleter GoTo<CR>
 nnoremap <Leader>f :YcmCompleter FixIt<CR>
@@ -118,6 +120,7 @@ set nobackup
 
 " graphic tab match
 set wildmenu
+
 " improves perf on macros
 set lazyredraw
 
@@ -125,7 +128,7 @@ set lazyredraw
 set foldenable
 set foldlevelstart=10
 set foldnestmax=10
-nnoremap <space> zA
+nnoremap <space> za
 set foldmethod=indent
 
 set backup
@@ -135,14 +138,58 @@ set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set writebackup
 
 set mouse=
+set path=.,**,,
 
-" Makefiles
-:map <f9> :make<CR>
-:map <f10> :cw<CR>
+" Dictionary
+set dictionary=/usr/share/dict/american-english
 
 " Enable thick cursor when in normal mode
 if has("autocmd")
 	au InsertEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
 	au InsertLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
 	au VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
+endif
+
+" Exit terminal mode
+if has('nvim')
+	tnoremap <ESC> <C-\><C-n>
+
+	let s:errors = []
+	let s:reg = '^.*:[0-9]*:.*'
+	let s:mak = '^makefile'
+	function! JobHandler(job_id, data, event)
+		if a:event == 'stdout'
+			let new_errors = []
+			for line in a:data
+				let ind = index(s:errors, line)
+				if line =~ s:reg && line !~ s:mak && ind < 0
+					call add(s:errors, line)
+					call add(new_errors, line)
+					copen
+				endif
+			endfor
+			if len(new_errors) > 0
+				caddexpr new_errors
+			endif
+		endif
+		if a:event == 'exit' && len(s:errors) == 0
+			echom 'Success!'
+		endif
+	endfunction
+
+	let s:callbacks = {
+	\ 'on_stdout': function('JobHandler'),
+	\ 'on_stderr': function('JobHandler'),
+	\ 'on_exit': function('JobHandler')
+	\ }
+
+	function! Make()
+		w
+		cclose
+		call setqflist([])
+		let s:errors = []
+		call jobstart(['make'], s:callbacks)
+	endfunction
+
+	nnoremap <leader>mk :call Make()<CR>
 endif
