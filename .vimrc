@@ -10,6 +10,9 @@ call vundle#begin()
 " FOr changing between header and source
 Plugin 'derekwyatt/vim-fswitch'
 
+" For visualising hex colors
+Plugin 'gorodinskiy/vim-coloresque'
+
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
