@@ -5,10 +5,12 @@ set rtp+=~/.vim/bundle/Vundle.vim/
 call vundle#begin()
 
 " plugins "
-"
 
 " Vundle - Plugin management
 Plugin 'gmarik/vundle'
+
+" simple-git
+Plugin 'hakbra/vim-simple-git'
 
 " For changing between header and source
 Plugin 'derekwyatt/vim-fswitch'
@@ -44,6 +46,15 @@ let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_max_diagnostics_to_display = 5
 
+" Customized status line
+Plugin 'vim-airline/vim-airline'
+let g:airline_section_y = ''
+let g:airline_section_z = ''
+let g:airline_section_error = ''
+let g:airline_section_warning = ''
+let g:airline#extensions#wordcount#enabled = 0
+let g:airline_powerline_fonts=1
+
 call vundle#end()
 filetype plugin indent on
 
@@ -55,8 +66,6 @@ imap jk <Esc>
 map <Leader>w :w<CR>
 " F4 to close window
 map <Leader>q :q<CR>
-" Reload vimrc
-map <Leader>v :source ~/.vimrc<CR>
 " Tab for next window
 nnoremap <Tab> <C-W>w
 " Shift-Tab for previous window
@@ -136,11 +145,15 @@ endif
 
 if has('nvim')
 	tnoremap <ESC> <C-\><C-n>
+	set noshowmode
 
 	let s:errors = []
 	let s:reg = '^.*:[0-9]*:.*'
 	let s:mak = '^makefile'
-	function! JobHandler(job_id, data, event)
+	let s:bib = "^WARN"
+
+	function! MakeHandlerStdout(job_id, data, event)
+		echom 'Making'
 		if a:event == 'stdout'
 			let new_errors = []
 			for line in a:data
@@ -149,6 +162,15 @@ if has('nvim')
 					call add(s:errors, line)
 					call add(new_errors, line)
 					copen
+				endif
+				if line =~ s:bib
+					let refs = split(line, "'")
+					if len(refs) >= 3
+						let ref = refs[2]
+						let [lnum, col] = searchpos("{".ref."}")
+						caddexpr expand('%').':'.lnum.':'.col.' Missing reference: '.ref
+						copen
+					endif
 				endif
 			endfor
 			if len(new_errors) > 0
@@ -160,19 +182,33 @@ if has('nvim')
 		endif
 	endfunction
 
+	function! MakeHandlerExit(job_id, data, event)
+		if len(s:errors) == 0
+			echom 'Success!'
+		endif
+	endfunction
+
 	let s:callbacks = {
-	\ 'on_stdout': function('JobHandler'),
-	\ 'on_stderr': function('JobHandler'),
-	\ 'on_exit': function('JobHandler')
+	\ 'on_stdout': function('MakeHandlerStdout'),
+	\ 'on_exit': function('MakeHandlerExit')
 	\ }
 
 	function! Make()
-		w
 		cclose
 		call setqflist([])
 		let s:errors = []
 		call jobstart(['make'], s:callbacks)
 	endfunction
 
+	function! MakeClean()
+		echom 'Make clean'
+		cclose
+		call setqflist([])
+		let s:errors = []
+		call jobstart(['make', 'clean'])
+	endfunction
+
+
 	nnoremap <leader>mk :call Make()<CR>
+	nnoremap <leader>mc :call MakeClean()<CR>
 endif
