@@ -28,11 +28,18 @@ let g:markdown_fold_style = 'nested'
 " Colorscheme
 Plugin 'sickill/vim-monokai.git'
 
+" True color colorscheme
+Plugin 'frankier/neovim-colors-solarized-truecolor-only'
+
 " Vim surround
 Plugin 'tpope/vim-surround.git'
 
 " Syntastic
 Plugin 'scrooloose/syntastic.git'
+
+" j/k jumps
+Plugin 'teranex/jk-jumps.vim'
+let g:jk_jumps_minimum_lines = 7
 
 " Taboo
 Plugin 'gcmt/taboo.vim.git'
@@ -44,7 +51,7 @@ let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.p
 let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_autoclose_preview_window_after_insertion = 1
-let g:ycm_max_diagnostics_to_display = 5
+set pumheight=5
 
 " Customized status line
 Plugin 'vim-airline/vim-airline'
@@ -58,6 +65,8 @@ let g:airline_powerline_fonts=1
 call vundle#end()
 filetype plugin indent on
 
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+
 " Key combos
 let mapleader=','
 " jk instead of escape to exit edit mode
@@ -67,15 +76,27 @@ map <Leader>w :w<CR>
 " F4 to close window
 map <Leader>q :q<CR>
 " Tab for next window
-nnoremap <Tab> <C-W>w
+nnoremap <Tab> <C-W>W
+" Ctrl I for next jump list
+nnoremap <C-P> <Tab>
 " Shift-Tab for previous window
-nnoremap <S-Tab> <C-W>W
+nnoremap <S-Tab> <C-W>w
 " Ctrl-K for new empty line above current
 nmap <C-K> O<Esc>
 " Ctrl-J for new empty line below current
 nmap <C-J> o<Esc>
 " Ctrl-n to remove search highlight
 nnoremap <C-N> :noh<CR>
+" Jump to position of mark
+map ' `
+" Previous buffer
+nnoremap  <C-^>
+
+" make splits
+nnoremap \| <C-W>v
+nnoremap § <C-W>v:term<CR>
+nnoremap - <C-W>s
+nnoremap _ <C-W>s:term<CR>
 
 " GO to definition
 nnoremap <Leader>d :YcmCompleter GoTo<CR>
@@ -88,14 +109,20 @@ set softtabstop=0
 set shiftwidth=4
 
 try
-	colorscheme monokai
+	" colorscheme monokai
+	set background=dark
+	colorscheme solarized
 catch /^Vim\%((\a\+)\)\=:E185/
 	" deal with it
 endtry
 syntax enable
 
+set splitright
+set splitbelow
+
 " Enable line numbering
 set relativenumber
+set number
 " Enable incremental search as you type
 set incsearch
 " Enable search highlight
@@ -110,6 +137,7 @@ cnoremap %s/ %s/\v
 
 " disable swp files
 set nobackup
+set nojoinspaces
 
 " graphic tab match
 set wildmenu
@@ -144,46 +172,75 @@ if has("autocmd")
 endif
 
 if has('nvim')
+	function! s:term_gf()
+		let procid = matchstr(bufname(""), '\(://.*/\)\@<=\(\d\+\)')
+		let proc_cwd = resolve('/proc/'.procid.'/cwd')
+		exe 'lcd '.proc_cwd
+		exe 'e <cfile>'
+	endfunction
+
+	au TermOpen * nmap <buffer> gf :call <SID>term_gf()<cr>
+
 	tnoremap <ESC> <C-\><C-n>
 	set noshowmode
 
-	let s:errors = []
-	let s:reg = '^.*:[0-9]*:.*'
-	let s:mak = '^makefile'
-	let s:bib = "^WARN"
+	let g:async_make_errors = []
+
+	function! LatexError(line)
+		let s:reg = '^.*:[0-9]*:.*'
+		let s:mak = '^makefile'
+		if a:line =~ s:reg && a:line !~ s:mak
+			return [a:line]
+		endif
+		return []
+	endfunction
+
+	function! ReferenceError(line)
+		let s:bib = "^WARN"
+		if a:line =~ s:bib
+			let refs = split(a:line, "'")
+			if len(refs) >= 3
+				let ref = refs[2]
+				let output = system('grep -rn "{'.ref.'}" *.tex')
+				let hits = split(output, '\n')
+				echom join(hits, "HH")
+				return hits
+			endif
+		endif
+		return []
+	endfunction
+
+	let g:make_filter_functions = [function('LatexError'), function('ReferenceError')]
 
 	function! MakeHandlerStdout(job_id, data, event)
 		echom 'Making'
 		if a:event == 'stdout'
-			let new_errors = []
 			for line in a:data
-				let ind = index(s:errors, line)
-				if line =~ s:reg && line !~ s:mak && ind < 0
-					call add(s:errors, line)
-					call add(new_errors, line)
-					copen
+
+				let ind = index(g:async_make_errors, line)
+
+				if ind >= 0
+					continue
 				endif
-				if line =~ s:bib
-					let refs = split(line, "'")
-					if len(refs) >= 3
-						let ref = refs[2]
-						let [lnum, col] = searchpos("{".ref."}")
-						caddexpr expand('%').':'.lnum.':'.col.' Missing reference: '.ref
+
+				for Func in g:make_filter_functions
+					let ret = Func(line)
+					for r in ret
+						caddexpr r
+						call add(g:async_make_errors, r)
 						copen
-					endif
-				endif
+					endfor
+				endfor
+
 			endfor
-			if len(new_errors) > 0
-				caddexpr new_errors
-			endif
 		endif
-		if a:event == 'exit' && len(s:errors) == 0
+		if a:event == 'exit' && len(g:async_make_errors) == 0
 			echom 'Success!'
 		endif
 	endfunction
 
 	function! MakeHandlerExit(job_id, data, event)
-		if len(s:errors) == 0
+		if len(g:async_make_errors) == 0
 			echom 'Success!'
 		endif
 	endfunction
@@ -196,7 +253,7 @@ if has('nvim')
 	function! Make()
 		cclose
 		call setqflist([])
-		let s:errors = []
+		let g:async_make_errors = []
 		call jobstart(['make'], s:callbacks)
 	endfunction
 
@@ -204,7 +261,7 @@ if has('nvim')
 		echom 'Make clean'
 		cclose
 		call setqflist([])
-		let s:errors = []
+		let g:async_make_errors = []
 		call jobstart(['make', 'clean'])
 	endfunction
 
