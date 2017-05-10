@@ -137,9 +137,8 @@ set softtabstop=0
 set shiftwidth=4
 
 try
-	" colorscheme monokai
-	set background=dark
-	colorscheme solarized
+	set background=light
+	colorscheme monokai
 catch /^Vim\%((\a\+)\)\=:E185/
 	" deal with it
 endtry
