@@ -4,7 +4,16 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim/
 call vundle#begin()
 
+" Windows
+" set rtp+=%USERPROFILE%/vimfiles/bundle/Vundle.vim/
+" call vundle#begin('c:/users/hkbrten/vimfiles/bundle/')
+
 " plugins "
+
+" Taglist
+Plugin 'vim-scripts/taglist.vim'
+let tlist_cs_settings = 'c#;c:class;x:cmdlet;p:property;m:method'
+let tlist_ps1_settings = 'powershell;f:function'
 
 " Vundle - Plugin management
 Plugin 'gmarik/vundle'
@@ -12,24 +21,17 @@ Plugin 'gmarik/vundle'
 " simple-git
 Plugin 'hakbra/vim-simple-git'
 
+" Powershell syntax
+Plugin 'PProvost/vim-ps1'
+
 " For changing between header and source
 Plugin 'derekwyatt/vim-fswitch'
-
-" Coffe script highlighting
-Plugin 'kchmck/vim-coffee-script'
 
 " Quick scope navigation
 Plugin 'unblevable/quick-scope'
 
-" Markdown folding
-Plugin 'nelstrom/vim-markdown-folding'
-let g:markdown_fold_style = 'nested'
-
 " Colorscheme
 Plugin 'sickill/vim-monokai.git'
-
-" True color colorscheme
-Plugin 'frankier/neovim-colors-solarized-truecolor-only'
 
 " Vim surround
 Plugin 'tpope/vim-surround.git'
@@ -41,12 +43,38 @@ Plugin 'scrooloose/syntastic.git'
 Plugin 'teranex/jk-jumps.vim'
 let g:jk_jumps_minimum_lines = 7
 
-" Taboo
+" ctrl-p
+Plugin 'ctrlpvim/ctrlp.vim'
+"
+" Custom matcher for faster search
+" Plugin 'FelikZ/ctrlp-py-matcher'
+" Faster custom matcher
+"
+Plugin 'JazzCore/ctrlp-cmatcher'
+" Mapping for finding files, mnemonic: f for files
+let g:ctrlp_map = '<c-f>'
+" Command invoked when doing ctrl-f
+let g:ctrlp_cmd = 'CtrlP'
+" Files contained in root folder, usually /dev
+let g:ctrlp_root_markers = ['tags', 'cscope.files']
+" Search only by filename, not in directory name, ctrl-d to temp revert
+let g:ctrlp_by_filename = 1
+" Disable regex for performance, ctrl-r to temp revert
+let g:ctrlp_regexp = 0
+" Search only files in cscope.files
+let g:ctrlp_user_command = ['cscope.files', 'type %s\cscope.files']
+" Use custom matcher function for perf
+" let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
+let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
+" Method of determining root directory, see docs
+let g:ctrlp_working_path_mode = 'rw'
+
+" Taboo tab naming
 Plugin 'gcmt/taboo.vim.git'
 set sessionoptions+=tabpages,globals
 
 " YouCompleteMe
- Plugin 'Valloric/YouCompleteMe.git'
+Plugin 'Valloric/YouCompleteMe.git'
 let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
 let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_autoclose_preview_window_after_completion = 1
@@ -64,8 +92,6 @@ let g:airline_powerline_fonts=1
 
 call vundle#end()
 filetype plugin indent on
-
-let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
 " Key combos
 let mapleader=','
@@ -91,6 +117,8 @@ nnoremap <C-N> :noh<CR>
 map ' `
 " Previous buffer
 nnoremap  <C-^>
+" open folder in explorer
+map <Leader>o :!start explorer /select,%:p<CR>
 
 " make splits
 nnoremap \| <C-W>v
@@ -131,13 +159,6 @@ set hlsearch
 set ignorecase
 " Enable global search default
 set gdefault
-" Enable very magic
-nnoremap / /\v
-cnoremap %s/ %s/\v
-
-" disable swp files
-set nobackup
-set nojoinspaces
 
 " graphic tab match
 set wildmenu
@@ -164,6 +185,32 @@ set path=.,**,,
 " Dictionary
 set dictionary=/usr/share/dict/american-english
 
+set guioptions-=m  "remove menu bar
+set guioptions-=T  "remove toolbar
+set guioptions-=r  "remove right-hand scroll bar
+set guioptions-=L  "remove left-hand scroll bar
+set guifont=Lucida_Console:h11:cDEFAULT
+
+set grepprg=grep\ -nH
+set tags=tags;
+set complete-=t
+
+set backspace=indent,eol,start
+
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+set autoindent
+
+set list
+set listchars=tab:>-,trail:~
+set ff=dos
+set nowrap
+
+let g:netrw_banner=0
+
+" ================== Console specific ===============
 " Enable thick cursor when in normal mode
 if has("autocmd")
 	au InsertEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
@@ -171,6 +218,7 @@ if has("autocmd")
 	au VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
 endif
 
+" ================== Neovim specific ===============
 if has('nvim')
 	function! s:term_gf()
 		let procid = matchstr(bufname(""), '\(://.*/\)\@<=\(\d\+\)')
@@ -188,3 +236,23 @@ if has('nvim')
 		execute 'source' f
 	endfor
 endif
+
+" ================== Work specific ===============
+map <Leader>to1 :cd c:\WS\Of_01\dev<CR>
+map <Leader>ts1 :cd c:\WS\Se_01\dev<CR>
+map <Leader>tg :cd C:\Users\hkbrten\Documents\Git<CR>
+
+function! CheckPowershellSyntax()
+    let scriptPath = "\\\\hkbrten-00\\Tools\\scripts\\powershellchecker.ps1"
+    let errorString = system("powershell -noprofile " . scriptPath . " -path " . bufname("%"))
+    if strlen(errorString) > 0
+        echom "Found errors"
+        call setqflist([])
+        caddexpr errorString
+        copen
+    else
+        echom "No errors!"
+    endif
+endfunction
+
+map <Leader>p :call CheckPowershellSyntax()<CR>
