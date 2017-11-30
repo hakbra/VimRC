@@ -1,43 +1,32 @@
 " required for vundle "
 set nocompatible
 filetype off
-set rtp+=~/.vim/bundle/Vundle.vim/
-call vundle#begin()
-
-" Windows
-" set rtp+=%USERPROFILE%/vimfiles/bundle/Vundle.vim/
-" call vundle#begin('c:/users/hkbrten/vimfiles/bundle/')
+set rtp+=%USERPROFILE%/vimfiles/bundle/Vundle.vim/
+call vundle#begin('c:/users/hkbrten/vimfiles/bundle/')
 
 " plugins "
+
+" Vundle - Plugin management
+Plugin 'gmarik/vundle'
+
+" Quick scope navigation
+Plugin 'unblevable/quick-scope'
 
 " Taglist
 Plugin 'vim-scripts/taglist.vim'
 let tlist_cs_settings = 'c#;c:class;x:cmdlet;p:property;m:method'
 let tlist_ps1_settings = 'powershell;f:function'
 
-" Vundle - Plugin management
-Plugin 'gmarik/vundle'
-
-" simple-git
-Plugin 'hakbra/vim-simple-git'
+" Colorscheme
+Plugin 'sickill/vim-monokai.git'
+Plugin 'john2x/flatui.vim'
+Plugin 'freeo/vim-kalisi'
 
 " Powershell syntax
 Plugin 'PProvost/vim-ps1'
 
-" For changing between header and source
-Plugin 'derekwyatt/vim-fswitch'
-
-" Quick scope navigation
-Plugin 'unblevable/quick-scope'
-
-" Colorscheme
-Plugin 'sickill/vim-monokai.git'
-
 " Vim surround
 Plugin 'tpope/vim-surround.git'
-
-" Syntastic
-Plugin 'scrooloose/syntastic.git'
 
 " j/k jumps
 Plugin 'teranex/jk-jumps.vim'
@@ -46,11 +35,9 @@ let g:jk_jumps_minimum_lines = 7
 " ctrl-p
 Plugin 'ctrlpvim/ctrlp.vim'
 "
-" Custom matcher for faster search
-" Plugin 'FelikZ/ctrlp-py-matcher'
 " Faster custom matcher
-"
 Plugin 'JazzCore/ctrlp-cmatcher'
+"
 " Mapping for finding files, mnemonic: f for files
 let g:ctrlp_map = '<c-f>'
 " Command invoked when doing ctrl-f
@@ -64,22 +51,10 @@ let g:ctrlp_regexp = 0
 " Search only files in cscope.files
 let g:ctrlp_user_command = ['cscope.files', 'type %s\cscope.files']
 " Use custom matcher function for perf
-" let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
 let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
 " Method of determining root directory, see docs
 let g:ctrlp_working_path_mode = 'rw'
-
-" Taboo tab naming
-Plugin 'gcmt/taboo.vim.git'
-set sessionoptions+=tabpages,globals
-
-" YouCompleteMe
-Plugin 'Valloric/YouCompleteMe.git'
-let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
-let g:ycm_add_preview_to_completeopt = 0
-let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
-set pumheight=5
+" Use F5 to clear cache
 
 " Customized status line
 Plugin 'vim-airline/vim-airline'
@@ -93,6 +68,9 @@ let g:airline_powerline_fonts=1
 call vundle#end()
 filetype plugin indent on
 
+let g:matchparen_timeout = 2
+let g:matchparen_insert_timeout = 2
+
 " Key combos
 let mapleader=','
 " jk instead of escape to exit edit mode
@@ -102,34 +80,35 @@ map <Leader>w :w<CR>
 " F4 to close window
 map <Leader>q :q<CR>
 " Tab for next window
-nnoremap <Tab> <C-W>W
+nnoremap <Tab> <C-W>w
 " Ctrl I for next jump list
 nnoremap <C-P> <Tab>
 " Shift-Tab for previous window
-nnoremap <S-Tab> <C-W>w
+nnoremap <S-Tab> <C-W>W
 " Ctrl-K for new empty line above current
 nmap <C-K> O<Esc>
 " Ctrl-J for new empty line below current
 nmap <C-J> o<Esc>
 " Ctrl-n to remove search highlight
 nnoremap <C-N> :noh<CR>
-" Jump to position of mark
-map ' `
 " Previous buffer
 nnoremap  <C-^>
+
+
 " open folder in explorer
 map <Leader>o :!start explorer /select,%:p<CR>
+" edit vimrc
+map <Leader>ve :e ~/_vimrc<CR>
+"source vimrc
+map <Leader>vs :source ~/_vimrc<CR>
+
+nnoremap <C-y> <C-t>
+nnoremap <C-t> <C-]>
+vnoremap <C-t> <C-]>
 
 " make splits
 nnoremap \| <C-W>v
-nnoremap § <C-W>v:term<CR>
 nnoremap - <C-W>s
-nnoremap _ <C-W>s:term<CR>
-
-" GO to definition
-nnoremap <Leader>d :YcmCompleter GoTo<CR>
-nnoremap <Leader>f :YcmCompleter FixIt<CR>
-nnoremap <Leader>h :FSHere<CR>
 
 " Tab
 set tabstop=4
@@ -137,10 +116,10 @@ set softtabstop=0
 set shiftwidth=4
 
 try
-	set background=light
-	colorscheme monokai
+    set background=dark
+    colorscheme kalisi
 catch /^Vim\%((\a\+)\)\=:E185/
-	" deal with it
+    " deal with it
 endtry
 syntax enable
 
@@ -173,10 +152,10 @@ nnoremap <space> za
 set foldmethod=indent
 
 set backup
-set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
-set backupskip=/tmp/*,/private/tmp/*
-set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set backupdir=~/.vim-tmp/backup//
 set writebackup
+set directory=~/.vim-tmp/swap//
+set undodir=~/.vim-tmp/undo//
 
 set mouse=
 set path=.,**,,
@@ -190,7 +169,7 @@ set guioptions-=r  "remove right-hand scroll bar
 set guioptions-=L  "remove left-hand scroll bar
 set guifont=Lucida_Console:h11:cDEFAULT
 
-set grepprg=grep\ -nH
+set grepprg=grep\ -nr
 set tags=tags;
 set complete-=t
 
@@ -209,37 +188,12 @@ set nowrap
 
 let g:netrw_banner=0
 
-" ================== Console specific ===============
-" Enable thick cursor when in normal mode
-if has("autocmd")
-	au InsertEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
-	au InsertLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
-	au VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
-endif
+" -------------- Work Specific -------------------
 
-" ================== Neovim specific ===============
-if has('nvim')
-	function! s:term_gf()
-		let procid = matchstr(bufname(""), '\(://.*/\)\@<=\(\d\+\)')
-		let proc_cwd = resolve('/proc/'.procid.'/cwd')
-		exe 'lcd '.proc_cwd
-		exe 'e <cfile>'
-	endfunction
-
-	au TermOpen * nmap <buffer> gf :call <SID>term_gf()<cr>
-
-	tnoremap <ESC> <C-\><C-n>
-	set noshowmode
-
-	for f in glob('~/.config/nvim/extra/*.vim', 0, 1)
-		execute 'source' f
-	endfor
-endif
-
-" ================== Work specific ===============
-map <Leader>to1 :cd c:\WS\Of_01\dev<CR>
-map <Leader>ts1 :cd c:\WS\Se_01\dev<CR>
-map <Leader>tg :cd C:\Users\hkbrten\Documents\Git<CR>
+map <Leader>to :cd c:\WS\Of_01\dev<CR>
+map <Leader>ts :cd c:\WS\Se_01\dev<CR>
+map <Leader>tg :cd c:\WS\gridmgr\src<CR>
+map <Leader>t1o :cd \\hkbrten-01\hkbrten_01_o1_Of_01\dev<CR>
 
 function! CheckPowershellSyntax()
     let scriptPath = "\\\\hkbrten-00\\Tools\\scripts\\powershellchecker.ps1"
